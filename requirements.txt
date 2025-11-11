@@ -1,4 +1,4 @@
-tensorflow==2.17.*
+tensorflow==2.20.*
 opencv-python
 scikit-learn
 matplotlib
