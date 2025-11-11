@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Data & models
+data/
+models/
+*.h5
+*.pb
+*.zip
+*.tar.gz
+
+# System
+.DS_Store
+Thumbs.db
+.env
