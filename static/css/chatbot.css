@@ -1,0 +1,103 @@
+/* === Chatbot UI standalone CSS === */
+
+.chat-toggle-btn {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    padding: 12px 20px;
+    background: #0066ff;
+    color: white;
+    border-radius: 12px 0 0 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transform: translateY(-50%);
+    z-index: 9998;
+}
+
+#chatbotPanel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 380px;
+    height: 100%;
+    background: white;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    transition: right 0.3s ease;
+    z-index: 9999;
+}
+
+#chatbotPanel.open {
+    right: 0;
+}
+
+#chatbotHeader {
+    background: #0066ff;
+    color: white;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chatbotClose {
+    cursor: pointer;
+    font-size: 22px;
+}
+
+#chatbotBody {
+    flex: 1;
+    padding: 15px;
+    background: #f6f8fc;
+    overflow-y: auto;
+}
+
+.chatbot-msg-box {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.chatbot-msg {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 70%;
+    font-size: 14px;
+}
+
+.chatbot-msg.user {
+    background: #0066ff;
+    color: white;
+    margin-left: auto;
+}
+
+.chatbot-msg.bot {
+    background: #e4e9ff;
+}
+
+#chatbotInputContainer {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    background: white;
+}
+
+#chatbotInput {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+#chatbotSend {
+    padding: 10px 18px;
+    margin-left: 10px;
+    background: #0066ff;
+    color: white;
+    border-radius: 8px;
+    border: none;
+}

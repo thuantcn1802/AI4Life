@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kết Quả – AI4Life</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            padding: 40px;
+        }
+        .container {
+            width: 500px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
+        }
+        .image-box {
+            width: 100%;
+            height: 320px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .info-box {
+            padding: 15px;
+            background: #f3f6ff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0066ff;
+            color: white;
+            border: none;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            display: block;
+        }
+        .back-btn:hover {
+            background: #0053cc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>KẾT QUẢ PHÂN TÍCH</h2>
+
+    <div class="image-box" id="resultImage"></div>
+
+    <div class="info-box">
+        <p><b>Bệnh dự đoán:</b> {{ pred_label }}</p>
+        <p><b>Độ tin cậy:</b> {{ probability * 100 }}%</p>
+        <p><b>Mức độ nguy cơ:</b> {{ risk_level }}</p>
+    </div>
+
+    <a href="/" class="back-btn">← Phân tích ảnh khác</a>
+</div>
+
+<script>
+    let imgUrl = "{{ url_for('static', filename=file_path) }}";
+    document.getElementById("resultImage").style.backgroundImage = `url('${imgUrl}')`;
+</script>
+
+</body>
+</html>

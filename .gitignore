@@ -1,0 +1,58 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments (conda / venv)
+.venv/
+.env
+env/
+venv/
+.ai4life/
+conda-meta/
+*.egg-info/
+*.egg
+
+# Byte-compiled / C extensions
+*.so
+
+# Packages & Caches
+pip_cache/
+*.log
+*.tmp
+
+# Data & Models
+data/
+models/
+*.h5
+*.keras
+*.pb
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.tflite
+*.zip
+*.tar.gz
+*.npz
+*.npy
+
+# Notebooks & Checkpoints
+.ipynb_checkpoints/
+
+# Configs / Secrets
+.env
+src/serviceAccountKey.json
+credentials.json
+token.json
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+
+# System Files
+.DS_Store
+Thumbs.db
