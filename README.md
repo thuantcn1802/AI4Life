@@ -15,7 +15,7 @@ Hệ thống nhận diện ung thư da qua ảnh chụp vùng da nghi ngờ, s�
 | Computer Vision | OpenCV |
 | Đánh giá mô hình | Scikit-learn |
 | Backend | Flask |
-| Cơ sở dữ liệu | MySQL |
+| Cơ sở dữ liệu | Firebase |
 | Giao diện | HTML / CSS / JavaScript |
 
 ## Hướng dẫn chạy Local
