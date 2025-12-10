@@ -1,0 +1,36 @@
+<!-- templates/admin_dashboard.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 bg-gray-100">
+  <h1 class="text-2xl font-bold mb-4">Admin Dashboard</h1>
+  <p>Total users: {{ total_users }}</p>
+
+  <h2 class="mt-6 text-xl">Pending Doctors</h2>
+  {% if pending_doctors %}
+    <table class="min-w-full bg-white mt-2">
+      <thead><tr><th>Email</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for d in pending_doctors %}
+          <tr>
+            <td class="p-2">{{ d.email }}</td>
+            <td class="p-2">
+              <form method="post" action="{{ url_for('admin.verify_doctor') }}">
+                <input type="hidden" name="uid" value="{{ d.uid if d.uid else '' }}">
+                <!-- ensure uid present in doc; if not, you may pass uid from server when building list -->
+                <button class="px-3 py-1 bg-green-600 text-white rounded">Verify</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Không có bác sĩ chờ duyệt.</p>
+  {% endif %}
+</body>
+</html>

@@ -3,10 +3,15 @@ import json
 import time
 import os
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY") 
 
 PRIMARY_MODEL = "groq/compound"
 FALLBACK_MODEL = "groq/compound-mini"
+
+if not GROQ_API_KEY:
+    raise RuntimeError(
+        "Missing GROQ_API_KEY. Set your Groq console key as an environment variable before running the app."
+    )
 
 def query_groq(prompt, model):
     url = "https://api.groq.com/openai/v1/chat/completions"

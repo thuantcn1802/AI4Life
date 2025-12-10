@@ -1,10 +1,17 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from tensorflow.keras.models import load_model
 from assistant import generate_reply, detect_disease_in_text
 from knowledge import search_similar_question, save_knowledge
 from groq_service import ask_groq
 import numpy as np
 import cv2, os
+from firebase_connect import verify_id_token, sign_in_with_email_and_password
+from functools import wraps
+from routes.auth_routes import auth_bp,login_required
+from routes.detect_routes import detect_bp
+from routes.admin_routes import admin_bp
+from routes.user_routes import user_bp
+from routes.doctor_routes import doctor_bp
 
 # Định nghĩa đường dẫn tới thư mục templates (nằm ngoài thư mục src)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,6 +23,12 @@ app = Flask(__name__, template_folder=TEMPLATES_DIR)
 # Cấu hình static đúng với vị trí gốc (nếu static nằm cạnh templates)
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 app.static_folder = STATIC_DIR
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+app.register_blueprint(auth_bp)
+app.register_blueprint(detect_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(user_bp)
+app.register_blueprint(doctor_bp)
 
 UPLOAD_FOLDER = os.path.join(STATIC_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -76,6 +89,8 @@ def ensemble_predict(image_path):
     confidence = float(pred[top_idx])
     return label, confidence
 
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -104,6 +119,7 @@ def index():
     return render_template("index.html")
 
 @app.route("/chatbox")
+@login_required
 def chat_ui():
     return render_template("chat.html")
 
@@ -132,6 +148,7 @@ def chat_api():
     return jsonify({"reply": ai_reply})
 
 @app.route("/predict", methods=["POST"])
+@login_required
 def predict_api():
     file = request.files.get("file")
 
@@ -160,4 +177,4 @@ def predict_api():
     })
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True) 

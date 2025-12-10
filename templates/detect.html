@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <title>AI4Life – Chẩn đoán Ung Thư Da</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/chatbot.css">
+</head>
+
+<body class="bg-light">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-primary" href="#">
+            <i class="bi bi-activity"></i> AI4Life SkinCare
+        </a>
+
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div id="navMenu" class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a href="#upload" class="nav-link">Chẩn đoán ảnh</a></li>
+                <li class="nav-item"><a href="#doctor" class="nav-link">Liên hệ bác sĩ</a></li>
+                <li class="nav-item"><a href="#tracking" class="nav-link">Theo dõi tiến độ</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="container py-4">
+
+    <!-- UPLOAD + RESULT -->
+    <div class="row g-4" id="upload">
+
+        <!-- LEFT: UPLOAD IMAGE -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Tải ảnh da để kiểm tra</h4>
+                    <p class="text-muted small">Hãy chụp vùng da rõ nét, đủ ánh sáng. AI sẽ phân tích trong vài giây.</p>
+
+                    <form id="uploadForm" enctype="multipart/form-data" class="text-center p-3 border rounded bg-light">
+
+                        <!-- Preview -->
+                        <div id="preview" class="preview mb-3 rounded">
+                            <span class="text-muted">Chưa có ảnh</span>
+                        </div>
+
+                        <input type="file" id="fileInput" class="form-control mb-3" accept="image/*">
+
+                        <button type="submit" id="btnPredict" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Phân tích ảnh
+                        </button>
+
+                        <p class="mt-2 text-muted small">AI hỗ trợ tham khảo, không thay thế chẩn đoán chuyên khoa.</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: RESULT -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0" id="resultCard">
+                <div class="card-body">
+
+                    <h4 class="card-title mb-3">Kết quả</h4>
+
+                    <div id="resultEmpty" class="alert alert-secondary small">Chưa có kết quả.</div>
+
+                    <div id="resultContent" class="d-none">
+
+                        <div class="badge bg-primary-subtle text-primary mb-2">
+                            <i class="bi bi-cpu"></i> AI4Life Model (ISIC)
+                        </div>
+
+                        <h5 id="res-diagnosis" class="fw-bold"></h5>
+                        <p id="res-label" class="text-muted"></p>
+                        <p id="res-confidence" class="small text-secondary"></p>
+
+                        <p id="res-description" class="mt-2"></p>
+
+                        <h6 class="mt-3">Mức độ nguy cơ</h6>
+                        <div id="res-risk-badges" class="mb-2"></div>
+
+                        <h6 class="mt-3">Khuyến nghị</h6>
+                        <ul id="res-recommendations"></ul>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT DOCTOR -->
+    <div class="row mt-5" id="doctor">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <h4 class="card-title mb-3">Liên hệ bác sĩ tư vấn</h4>
+
+                    <form id="doctorForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Họ và tên</label>
+                                <input type="text" id="name" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" id="phone" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Tuổi</label>
+                                <input type="number" id="age" class="form-control">
+                            </div>
+
+                            <div class="col-md-9">
+                                <label class="form-label">Mức độ ưu tiên</label>
+                                <select id="priority" class="form-select">
+                                    <option value="normal">Bình thường</option>
+                                    <option value="soon">Nên liên hệ sớm</option>
+                                    <option value="urgent">Khẩn cấp</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Mô tả triệu chứng</label>
+                                <textarea id="symptoms" class="form-control"></textarea>
+                            </div>
+                        </div>
+
+                        <button id="btnContact" class="btn btn-success w-100 mt-3">
+                            <i class="bi bi-telephone"></i> Gửi yêu cầu tư vấn
+                        </button>
+
+                        <div id="doctorStatus" class="mt-2 small"></div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRACKING HISTORY -->
+    <div class="row mt-5" id="tracking">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <h4 class="card-title">Theo dõi tiến độ</h4>
+                    <button id="btnClearHistory" class="btn btn-danger btn-sm float-end mb-3">
+                        Xóa lịch sử
+                    </button>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Thời gian</th>
+                                    <th>Chẩn đoán</th>
+                                    <th>Nguy cơ</th>
+                                    <th>Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CHATBOT TOGGLE BUTTON -->
+<div id="chatbotToggle" class="chat-toggle-btn">💬 Chatbot</div>
+
+<!-- CHATBOT PANEL -->
+<div id="chatbotPanel">
+    <div id="chatbotHeader">
+        AI4Life Assistant
+        <span id="chatbotClose">✖</span>
+    </div>
+
+    <div id="chatbotBody"></div>
+
+    <div id="chatbotInputContainer">
+        <input type="text" id="chatbotInput" placeholder="Nhập câu hỏi...">
+        <button id="chatbotSend">Gửi</button>
+    </div>
+</div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- App Logic -->
+<script src="../static/js/app.js"></script>
+<script src="../static/js/chatbot.js"></script>
+
+</body>
+</html>

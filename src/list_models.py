@@ -1,6 +1,6 @@
 import requests
-
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+import os
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 url = "https://api.groq.com/openai/v1/models"
 headers = {"Authorization": f"Bearer {GROQ_API_KEY}"}

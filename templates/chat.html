@@ -1,374 +1,264 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>AI4Life – Chat Assistant</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trợ lý tư vấn</title>
 
-<style>
-    body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        background: #eef2f7;
-        margin: 0;
-        padding: 40px 0;
-        display: flex;
-        justify-content: center;
-    }
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    .chat-container {
-        width: 480px;
-        background: white;
-        border-radius: 18px;
-        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    .chat-header {
-        background: linear-gradient(90deg, #0066ff, #4d9aff);
-        padding: 18px;
-        color: white;
-        font-size: 22px;
-        font-weight: bold;
-        text-align: center;
-        letter-spacing: 1px;
-    }
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-teal': '#8CDAD4',
+                        'medical-dark': '#2D8B84',
+                        'medical-btn': '#5BBFB2',
+                        'chat-bg': '#F0F9F8',
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 
-    .chat-body {
-        height: 550px;
-        padding: 20px;
-        background: #f6f8fc;
-        overflow-y: auto;
-    }
+    <style>
+        /* Tùy chỉnh thanh cuộn */
+        #chatBody::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chatBody::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        #chatBody::-webkit-scrollbar-thumb {
+            background: #ccc; 
+            border-radius: 4px;
+        }
+        #chatBody::-webkit-scrollbar-thumb:hover {
+            background: #aaa; 
+        }
 
-    /* Chat message box */
-    .msg-box {
-        display: flex;
-        margin-bottom: 18px;
-        align-items: flex-end;
-    }
-
-    .msg-box.user {
-        justify-content: flex-end;
-    }
-
-    .msg-box img {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        margin-right: 10px;
-    }
-
-    .msg-box.user img {
-        margin-left: 10px;
-        margin-right: 0;
-    }
-
-    .msg {
-        max-width: 70%;
-        padding: 12px 16px;
-        border-radius: 16px;
-        font-size: 15px;
-        line-height: 1.5;
-        box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
-    }
-
-    .msg.bot {
-        background: #e4e9ff;
-        border-bottom-left-radius: 4px;
-    }
-
-    .msg.user {
-        background: #0066ff;
-        color: white;
-        border-bottom-right-radius: 4px;
-    }
-
-    /* Input box */
-    .chat-input {
-        display: flex;
-        padding: 14px;
-        border-top: 1px solid #dcdcdc;
-        background: #fff;
-    }
-
-    .chat-input input {
-        flex: 1;
-        padding: 12px;
-        border: 1px solid #c8c8c8;
-        border-radius: 10px;
-        font-size: 15px;
-        outline: none;
-        transition: 0.25s;
-    }
-
-    .chat-input input:focus {
-        border-color: #0066ff;
-        box-shadow: 0px 0px 4px #aac7ff;
-    }
-
-    .send-btn {
-        margin-left: 10px;
-        background: #0066ff;
-        border: none;
-        border-radius: 12px;
-        padding: 0 18px;
-        color: white;
-        font-size: 18px;
-        cursor: pointer;
-    }
-
-    .send-btn:hover {
-        background: #0053cc;
-    }
-
-    /* Nút mở chat */
-    .chat-toggle {
-        position: fixed;
-        right: 0;
-        top: 50%;
-        padding: 12px 20px;
-        background: #0066ff;
-        color: white;
-        border-radius: 12px 0 0 12px;
-        cursor: pointer;
-        font-weight: bold;
-        transform: translateY(-50%);
-    }
-
-    /* Panel chat nằm bên phải */
-    .chat-panel {
-        position: fixed;
-        top: 0;
-        right: -400px; /* ban đầu ẩn */
-        width: 380px;
-        height: 100%;
-        background: white;
-        box-shadow: -4px 0 20px rgba(0,0,0,0.15);
-        display: flex;
-        flex-direction: column;
-        transition: right 0.3s ease;
-        z-index: 9999;
-    }
-
-    .chat-panel.open {
-        right: 0;
-    }
-
-    .chat-header {
-        background: #0066ff;
-        color: white;
-        padding: 15px;
-        font-size: 20px;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .chat-close {
-        cursor: pointer;
-        font-size: 22px;
-    }
-
-    .chat-body {
-        flex: 1;
-        padding: 15px;
-        background: #f6f8fc;
-        overflow-y: auto;
-    }
-
-    .msg-box {
-        margin-bottom: 15px;
-    }
-
-    .msg {
-        display: inline-block;
-        padding: 10px 14px;
-        border-radius: 12px;
-        max-width: 70%;
-    }
-
-    .msg.user {
-        background: #0066ff;
-        color: white;
-        float: right;
-    }
-
-    .msg.bot {
-        background: #e4e9ff;
-        float: left;
-    }
-
-    .chat-input {
-        padding: 10px;
-        border-top: 1px solid #ddd;
-        display: flex;
-    }
-
-    .chat-input input {
-        flex: 1;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-    }
-
-    .chat-input button {
-        padding: 10px 18px;
-        margin-left: 10px;
-        background: #0066ff;
-        color: white;
-        border-radius: 8px;
-        border: none;
-    }
-
-</style>
+        /* Format nội dung Markdown */
+        .bot-msg ul { list-style-type: disc; padding-left: 1.2rem; margin: 0.5rem 0; }
+        .bot-msg ol { list-style-type: decimal; padding-left: 1.2rem; margin: 0.5rem 0; }
+        .bot-msg strong { color: #2D8B84; font-weight: 600; }
+        .bot-msg p { margin-bottom: 0.5rem; }
+        .bot-msg table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9em; }
+        .bot-msg th, .bot-msg td { border: 1px solid #ddd; padding: 6px; }
+        .bot-msg th { background-color: #f3f4f6; }
+    </style>
 </head>
 
-<body>
+<body class="bg-chat-bg h-screen flex flex-col font-sans">
 
-<div class="chat-container">
-    <div class="chat-header">AI4Life Assistant</div>
+    <header class="bg-white shadow-sm py-4 px-6 flex justify-between items-center z-10">
+        <div class="flex items-center gap-2">
+            <a href="/" class="flex items-center gap-2 text-2xl font-bold text-teal-600 tracking-wide hover:opacity-80 transition">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                SkinCare AI
+            </a>
+            <span class="hidden md:inline text-gray-400 text-sm border-l border-gray-300 pl-3 ml-1">Trợ lý sức khỏe ảo</span>
+        </div>
+        <a href="/" class="text-gray-500 hover:text-medical-dark font-medium text-sm flex items-center gap-1 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Quay lại trang chủ
+        </a>
+    </header>
 
-    <div class="chat-body" id="chatBody"></div>
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col h-full overflow-hidden">
+        
+        <div class="bg-white rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden border border-gray-100 relative">
+            
+            <div class="bg-medical-teal p-4 flex items-center gap-3 text-white shadow-sm">
+                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-lg leading-tight">AI4Life Assistant</h2>
+                    <p class="text-xs text-white/80 flex items-center gap-1">
+                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        Luôn sẵn sàng hỗ trợ
+                    </p>
+                </div>
+            </div>
 
-    <div class="chat-input">
-        <input type="text" id="userInput" placeholder="Nhập câu hỏi... (VD: triệu chứng melanoma?)">
-        <button class="send-btn" onclick="sendMessage()">✈</button>
-    </div>
-</div>
+            <div id="chatBody" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-gray-50/50">
+                <div class="flex gap-4 max-w-[85%]">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-medical-teal flex items-center justify-center flex-shrink-0 text-white shadow-sm">
+                        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 mb-1 ml-1">AI Assistant</div>
+                        <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-gray-700 leading-relaxed bot-msg">
+                            Xin chào! Tôi là trợ lý AI chuyên về da liễu. <br>
+                            Bạn có thể hỏi tôi về các triệu chứng, cách chăm sóc da hoặc phân tích hình ảnh.
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<div id="chatToggle" class="chat-toggle">Chatbot</div>
-<div id="chatPanel" class="chat-panel">
-    <div class="chat-header">
-        AI4Life Assistant
-        <span id="chatClose" class="chat-close">✖</span>
-    </div>
+            <div class="p-4 bg-white border-t border-gray-100">
+                <div class="relative flex items-center gap-2 max-w-4xl mx-auto">
+                    <input 
+                        type="text" 
+                        id="userInput" 
+                        placeholder="Nhập câu hỏi của bạn tại đây..." 
+                        class="w-full bg-gray-100 text-gray-700 border-0 rounded-full py-4 pl-6 pr-14 focus:ring-2 focus:ring-medical-teal focus:bg-white transition-all shadow-inner text-sm md:text-base"
+                        autocomplete="off"
+                    >
+                    <button 
+                        onclick="sendMessage()" 
+                        class="absolute right-2 bg-medical-btn hover:bg-medical-dark text-white p-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9-2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    </button>
+                </div>
+                <div class="text-center mt-2">
+                    <p class="text-[10px] text-gray-400">AI có thể mắc lỗi. Vui lòng tham khảo ý kiến bác sĩ cho các quyết định y tế quan trọng.</p>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    <div id="chatBody" class="chat-body"></div>
+    <script>
+        const chatBody = document.getElementById("chatBody");
+        const userInput = document.getElementById("userInput");
+        let isProcessing = false;
 
-    <div class="chat-input">
-        <input type="text" id="userInput" placeholder="Nhập câu hỏi...">
-        <button onclick="sendMessage()">Gửi</button>
-    </div>
-</div>
-
-
-<script>
-    const chatBody = document.getElementById("chatBody");
-
-    function appendMessage(text, sender) {
-        const box = document.createElement("div");
-        box.className = "msg-box " + sender;
-
-        const avatar = document.createElement("img");
-
-        if (sender === "bot") {
-            avatar.src = "https://www.shutterstock.com/image-vector/chat-bot-icon-design-robot-600nw-2476207303.jpg";  // avatar chatbot AI
-        } else {
-            avatar.src = "https://cdn-icons-png.flaticon.com/512/9187/9187604.png"; // avatar người dùng
+        // Hàm cuộn xuống dưới cùng
+        function scrollToBottom() {
+            chatBody.scrollTo({
+                top: chatBody.scrollHeight,
+                behavior: 'smooth'
+            });
         }
 
-        const msg = document.createElement("div");
-        msg.className = "msg " + sender;
-        msg.textContent = text;
+        // Hàm render tin nhắn
+        function appendMessage(text, sender) {
+            const container = document.createElement("div");
+            container.className = `flex gap-4 max-w-[90%] md:max-w-[80%] ${sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`;
 
-        if (sender === "user") {
-            box.appendChild(msg);
-            box.appendChild(avatar);
-        } else {
-            box.appendChild(avatar);
-            box.appendChild(msg);
+            // Avatar
+            const avatar = document.createElement("div");
+            avatar.className = `w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${sender === 'user' ? 'bg-indigo-500 text-white' : 'bg-medical-teal text-white'}`;
+            
+            if (sender === 'user') {
+                avatar.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`;
+            } else {
+                avatar.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`;
+            }
+
+            // Nội dung tin nhắn
+            const contentDiv = document.createElement("div");
+            contentDiv.className = "flex flex-col";
+            
+            // Tên người gửi
+            const name = document.createElement("span");
+            name.className = `text-xs text-gray-400 mb-1 ${sender === 'user' ? 'text-right mr-1' : 'ml-1'}`;
+            name.innerText = sender === 'user' ? 'Bạn' : 'AI Assistant';
+
+            // Bong bóng chat
+            const bubble = document.createElement("div");
+            if (sender === 'user') {
+                bubble.className = "bg-medical-btn text-white p-3 md:p-4 rounded-2xl rounded-tr-none shadow-md text-sm md:text-base leading-relaxed break-words";
+                bubble.textContent = text;
+            } else {
+                bubble.className = "bg-white text-gray-700 p-3 md:p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm md:text-base leading-relaxed bot-msg break-words";
+                // Xử lý Markdown cho Bot
+                try {
+                    bubble.innerHTML = marked.parse(text);
+                } catch (e) {
+                    bubble.textContent = text;
+                }
+            }
+
+            contentDiv.appendChild(name);
+            contentDiv.appendChild(bubble);
+
+            container.appendChild(avatar);
+            container.appendChild(contentDiv);
+
+            chatBody.appendChild(container);
+            scrollToBottom();
+            return bubble; // Trả về bubble để update khi loading
         }
 
-        chatBody.appendChild(box);
+        // Hàm tạo hiệu ứng Loading
+        function appendLoading() {
+            const container = document.createElement("div");
+            container.className = "flex gap-4 max-w-[80%] loading-msg";
+            container.innerHTML = `
+                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-medical-teal flex items-center justify-center flex-shrink-0 text-white shadow-sm">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <div>
+                     <span class="text-xs text-gray-400 mb-1 ml-1 block">AI Assistant</span>
+                     <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 flex gap-1 items-center h-12">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                     </div>
+                </div>
+            `;
+            chatBody.appendChild(container);
+            scrollToBottom();
+            return container;
+        }
 
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
+        // Xử lý gửi tin
+        async function sendMessage() {
+            if (isProcessing) return;
+            const text = userInput.value.trim();
+            if (!text) return;
 
-    async function sendMessage() {
-        const input = document.getElementById("userInput");
-        const text = input.value.trim();
+            // 1. Hiện tin nhắn user
+            appendMessage(text, "user");
+            userInput.value = "";
+            userInput.focus();
 
-        if (!text) return;
-        appendMessage(text, "user");
-        input.value = "";
+            // 2. Hiện loading
+            isProcessing = true;
+            const loadingElement = appendLoading();
 
-        // Bot typing effect
-        appendMessage("Đang xử lý...", "bot");
-        const loadingBox = chatBody.lastChild.querySelector(".msg");
+            try {
+                // 3. Gọi API
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({message: text})
+                });
+                
+                const data = await response.json();
 
-        // Send to Flask API
-        const response = await fetch("/chat", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: text})
+                // 4. Xóa loading và hiện tin nhắn Bot
+                loadingElement.remove();
+                appendMessage(data.reply || "Xin lỗi, tôi không nhận được phản hồi.", "bot");
+
+            } catch (err) {
+                loadingElement.remove();
+                console.error(err);
+                appendMessage("Lỗi kết nối đến máy chủ.", "bot");
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // Sự kiện phím Enter
+        userInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sendMessage();
+            }
         });
-
-        const data = await response.json();
-
-        loadingBox.textContent = data.reply;
-    }
-
-    document.getElementById("userInput").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-</script>
-
-<script>
-    const chatPanel = document.getElementById("chatPanel");
-    const chatToggle = document.getElementById("chatToggle");
-    const chatClose = document.getElementById("chatClose");
-    chatToggle.onclick = () => {
-        chatPanel.classList.add("open");
-    };
-
-    chatClose.onclick = () => {
-        chatPanel.classList.remove("open");
-    };
-
-    function appendMessage(text, sender) {
-        const msgBox = document.createElement("div");
-        msgBox.className = "msg-box";
-
-        const msg = document.createElement("div");
-        msg.className = "msg " + sender;
-        msg.textContent = text;
-
-        msgBox.appendChild(msg);
-        chatBody.appendChild(msgBox);
-
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
-
-    async function sendMessage() {
-        const input = document.getElementById("userInput");
-        const text = input.value.trim();
-        if (!text) return;
-
-        appendMessage(text, "user");
-        input.value = "";
-
-        appendMessage("Đang xử lý...", "bot");
-        const loading = chatBody.lastChild.querySelector(".msg");
-
-        const response = await fetch("/chat", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: text})
-        });
-
-        const data = await response.json();
-        loading.textContent = data.reply;
-    }
-
-    document.getElementById("userInput").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") sendMessage();
-    });
-</script>
-
+    </script>
 </body>
 </html>

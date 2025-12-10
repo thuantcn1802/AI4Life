@@ -44,7 +44,13 @@ Link: https://console.groq.com/keys
 
 Sau đó tạo file .env:
 
-GROQ_API_KE Y= your_api_key_here
+GROQ_API_KEY=your_api_key_here
+
+Nạp biến môi trường (mỗi lần mở terminal mới):
+
+export GROQ_API_KEY=your_api_key_here
+
+-- FLASK_SECRET_KEY = thích điền gì thì điền
 
 4 Chạy ứng dụng (trong conda)
 
@@ -54,4 +60,3 @@ python app.py
 
 Ứng dụng Flask chạy tại:
 http://127.0.0.1:5000
-
