@@ -44,11 +44,15 @@ def login():
         session["email"] = res.get("email")
 
         uid = res.get("localId")
+        
+        session["uid"] = uid 
 
         # load user profile
         user_doc = db.collection("users").document(uid).get()
 
         if not user_doc.exists:
+            # Nếu user chưa có trong database, có thể tự tạo nhanh hoặc báo lỗi
+            # Ở đây ta báo lỗi như cũ
             session.clear()
             return render_template("login.html", error="Tài khoản chưa có profile")
 
@@ -58,15 +62,12 @@ def login():
         # redirect theo role
         if role == "admin":
             return redirect("/admin")
-
         elif role == "doctor":
             return redirect("/doctor/dashboard")
-
         else:
-            return redirect("/user/dashboard")
+            return redirect("/detect") # Hoặc trang dashboard của user
 
     return render_template("login.html")
-
 
 
 # trong routes/auth_routes.py (chỉ thay phần register)

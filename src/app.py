@@ -3,7 +3,7 @@ from assistant import generate_reply, detect_disease_in_text
 from knowledge import search_similar_question, save_knowledge
 from groq_service import ask_groq
 import numpy as np
-import cv2, os
+import os
 from firebase_connect import verify_id_token, sign_in_with_email_and_password
 from functools import wraps
 from routes.auth_routes import auth_bp,login_required
