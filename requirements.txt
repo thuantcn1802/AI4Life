@@ -6,3 +6,7 @@ flask
 numpy
 pillow
 firebase-admin
+python-dotenv
+scikit-image
+reportlab
+supabase

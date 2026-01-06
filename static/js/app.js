@@ -42,7 +42,7 @@ function renderRiskBadge(riskText) {
 }
 
 // ======================================================
-// 3) SUBMIT ẢNH → GỌI API /predict
+// 3) SUBMIT ẢNH → GỌI API /detect/predict
 // ======================================================
 uploadForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -57,7 +57,7 @@ uploadForm.addEventListener("submit", async (e) => {
     formData.append("file", file);
 
     try {
-        const res = await fetch("/predict", {
+        const res = await fetch("/detect/predict", {
             method: "POST",
             body: formData
         });
@@ -97,12 +97,6 @@ uploadForm.addEventListener("submit", async (e) => {
                 "Không tự ý điều trị tại nhà.",
                 "Theo dõi thay đổi bất thường trong 24–48 giờ."
             ];
-        } else if (risk.includes("Trung")) {
-            recs = [
-                "Theo dõi trong 1–2 tuần.",
-                "Tránh tiếp xúc nắng gắt.",
-                "Nếu tổn thương lan rộng, hãy đi khám."
-            ];
         } else {
             recs = [
                 "Tổn thương có khả năng lành tính.",
@@ -122,13 +116,5 @@ uploadForm.addEventListener("submit", async (e) => {
     btnPredict.innerHTML = `<i class="bi bi-search"></i> Phân tích ảnh`;
 });
 
-// ======================================================
-// 4) LỊCH SỬ THEO DÕI (Không sửa phần này)
-// ======================================================
-// ... (giữ nguyên phần lịch sử của bạn)
 
-// ======================================================
-// 5) CHATBOT – giữ nguyên (không liên quan lỗi UI)
-// ======================================================
-// ... (giữ nguyên phần chatbot của bạn)
 

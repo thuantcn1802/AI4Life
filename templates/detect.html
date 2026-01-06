@@ -1,218 +1,474 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8" />
-    <title>AI4Life – Chẩn đoán Ung Thư Da</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chẩn đoán hình ảnh - AI4Life</title>
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-    <!-- Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="../static/css/style.css">
-    <link rel="stylesheet" href="../static/css/chatbot.css">
-</head>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "medical-teal": "#8CDAD4",
+              "medical-dark": "#2D8B84",
+              "medical-btn": "#5BBFB2",
+              "medical-btn-hover": "#4DA398",
+              "danger-red": "#E57373",
+            },
+            fontFamily: {
+              sans: ['"Be Vietnam Pro"', "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .drag-active {
+        border-color: #5bbfb2 !important;
+        background-color: #f0f9f8 !important;
+        transform: scale(1.01);
+      }
+      input[type="file"] {
+        display: none;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
 
-<body class="bg-light">
+      /* Class ẩn để dùng cho PDF Template */
+      .print-only {
+        display: none;
+      }
+    </style>
+  </head>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-primary" href="#">
-            <i class="bi bi-activity"></i> AI4Life SkinCare
-        </a>
-
-        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div id="navMenu" class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a href="#upload" class="nav-link">Chẩn đoán ảnh</a></li>
-                <li class="nav-item"><a href="#doctor" class="nav-link">Liên hệ bác sĩ</a></li>
-                <li class="nav-item"><a href="#tracking" class="nav-link">Theo dõi tiến độ</a></li>
-            </ul>
+  <body class="bg-gray-50 text-gray-700 font-sans flex flex-col min-h-screen">
+    <nav
+      class="bg-white shadow-sm w-full z-40 sticky top-0 border-b border-gray-100"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+          <div class="flex-shrink-0 flex items-center">
+            <a
+              href="/"
+              class="flex items-center gap-2 text-2xl font-bold text-teal-600 tracking-wide"
+            >
+              <svg
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              SkinCare AI
+            </a>
+          </div>
+          <div class="flex items-center space-x-6">
+            <a
+              href="/chatbox"
+              class="text-gray-500 hover:text-medical-btn font-medium transition flex items-center gap-2"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                ></path>
+              </svg>
+              Trợ lý ảo
+            </a>
+          </div>
         </div>
-    </div>
-</nav>
+      </div>
+    </nav>
 
-<!-- MAIN CONTENT -->
-<div class="container py-4">
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+      <div class="mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
+          Chẩn đoán hình ảnh
+        </h1>
+      </div>
 
-    <!-- UPLOAD + RESULT -->
-    <div class="row g-4" id="upload">
-
-        <!-- LEFT: UPLOAD IMAGE -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h4 class="card-title mb-3">Tải ảnh da để kiểm tra</h4>
-                    <p class="text-muted small">Hãy chụp vùng da rõ nét, đủ ánh sáng. AI sẽ phân tích trong vài giây.</p>
-
-                    <form id="uploadForm" enctype="multipart/form-data" class="text-center p-3 border rounded bg-light">
-
-                        <!-- Preview -->
-                        <div id="preview" class="preview mb-3 rounded">
-                            <span class="text-muted">Chưa có ảnh</span>
-                        </div>
-
-                        <input type="file" id="fileInput" class="form-control mb-3" accept="image/*">
-
-                        <button type="submit" id="btnPredict" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i> Phân tích ảnh
-                        </button>
-
-                        <p class="mt-2 text-muted small">AI hỗ trợ tham khảo, không thay thế chẩn đoán chuyên khoa.</p>
-                    </form>
-                </div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+        <div class="lg:col-span-5 space-y-6">
+          <div
+            class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+          >
+            <div
+              class="bg-medical-dark p-4 text-white font-semibold flex justify-between"
+            >
+              <span>1. Tải ảnh lên</span>
+              <span class="text-xs bg-white/20 px-2 py-1 rounded"
+                >Hỗ trợ 1022x767</span
+              >
             </div>
-        </div>
-
-        <!-- RIGHT: RESULT -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0" id="resultCard">
-                <div class="card-body">
-
-                    <h4 class="card-title mb-3">Kết quả</h4>
-
-                    <div id="resultEmpty" class="alert alert-secondary small">Chưa có kết quả.</div>
-
-                    <div id="resultContent" class="d-none">
-
-                        <div class="badge bg-primary-subtle text-primary mb-2">
-                            <i class="bi bi-cpu"></i> AI4Life Model (ISIC)
-                        </div>
-
-                        <h5 id="res-diagnosis" class="fw-bold"></h5>
-                        <p id="res-label" class="text-muted"></p>
-                        <p id="res-confidence" class="small text-secondary"></p>
-
-                        <p id="res-description" class="mt-2"></p>
-
-                        <h6 class="mt-3">Mức độ nguy cơ</h6>
-                        <div id="res-risk-badges" class="mb-2"></div>
-
-                        <h6 class="mt-3">Khuyến nghị</h6>
-                        <ul id="res-recommendations"></ul>
-
+            <div class="p-6">
+              <form
+                id="predictForm"
+                enctype="multipart/form-data"
+                class="space-y-5"
+              >
+                <div class="grid grid-cols-2 gap-3">
+                  <label class="cursor-pointer">
+                    <input
+                      type="radio"
+                      name="visit_type"
+                      value="initial"
+                      checked
+                      class="peer sr-only"
+                    />
+                    <div
+                      class="text-center py-2 border rounded-lg peer-checked:bg-teal-50 peer-checked:border-medical-btn peer-checked:text-teal-700 hover:bg-gray-50 transition text-sm font-medium"
+                    >
+                      Lần đầu
                     </div>
+                  </label>
+                  <label class="cursor-pointer">
+                    <input
+                      type="radio"
+                      name="visit_type"
+                      value="followup"
+                      class="peer sr-only"
+                    />
+                    <div
+                      class="text-center py-2 border rounded-lg peer-checked:bg-teal-50 peer-checked:border-medical-btn peer-checked:text-teal-700 hover:bg-gray-50 transition text-sm font-medium"
+                    >
+                      Tái khám
+                    </div>
+                  </label>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- CONTACT DOCTOR -->
-    <div class="row mt-5" id="doctor">
-        <div class="col-lg-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-
-                    <h4 class="card-title mb-3">Liên hệ bác sĩ tư vấn</h4>
-
-                    <form id="doctorForm">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Họ và tên</label>
-                                <input type="text" id="name" class="form-control" required>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="tel" id="phone" class="form-control" required>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label">Tuổi</label>
-                                <input type="number" id="age" class="form-control">
-                            </div>
-
-                            <div class="col-md-9">
-                                <label class="form-label">Mức độ ưu tiên</label>
-                                <select id="priority" class="form-select">
-                                    <option value="normal">Bình thường</option>
-                                    <option value="soon">Nên liên hệ sớm</option>
-                                    <option value="urgent">Khẩn cấp</option>
-                                </select>
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label">Mô tả triệu chứng</label>
-                                <textarea id="symptoms" class="form-control"></textarea>
-                            </div>
-                        </div>
-
-                        <button id="btnContact" class="btn btn-success w-100 mt-3">
-                            <i class="bi bi-telephone"></i> Gửi yêu cầu tư vấn
-                        </button>
-
-                        <div id="doctorStatus" class="mt-2 small"></div>
-                    </form>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TRACKING HISTORY -->
-    <div class="row mt-5" id="tracking">
-        <div class="col-lg-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-
-                    <h4 class="card-title">Theo dõi tiến độ</h4>
-                    <button id="btnClearHistory" class="btn btn-danger btn-sm float-end mb-3">
-                        Xóa lịch sử
-                    </button>
-
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Thời gian</th>
-                                    <th>Chẩn đoán</th>
-                                    <th>Nguy cơ</th>
-                                    <th>Ghi chú</th>
-                                </tr>
-                            </thead>
-                            <tbody id="historyBody"></tbody>
-                        </table>
+                <div>
+                  <label
+                    for="fileInput"
+                    id="dropArea"
+                    class="aspect-[4/3] flex flex-col items-center justify-center w-full border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all relative overflow-hidden group shadow-inner"
+                  >
+                    <div
+                      id="uploadPlaceholder"
+                      class="flex flex-col items-center justify-center pt-5 pb-6"
+                    >
+                      <div
+                        class="p-4 bg-white rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform"
+                      >
+                        <svg
+                          class="w-10 h-10 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <p class="mb-2 text-sm text-gray-500 font-medium">
+                        Nhấn để tải ảnh hoặc kéo thả
+                      </p>
+                      <p class="text-xs text-gray-400">
+                        Khuyến nghị kích thước 1022x767
+                      </p>
                     </div>
 
+                    <img
+                      id="imagePreview"
+                      class="absolute inset-0 w-full h-full object-cover hidden"
+                    />
+
+                    <input
+                      type="file"
+                      name="image"
+                      id="fileInput"
+                      accept="image/*"
+                    />
+                  </label>
                 </div>
+
+                <button
+                  id="btnPredict"
+                  type="submit"
+                  class="w-full bg-medical-btn hover:bg-medical-btn-hover text-white font-bold py-3 rounded-xl shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95 flex justify-center items-center gap-2"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                    ></path>
+                  </svg>
+                  <span>Phân tích ngay</span>
+                </button>
+              </form>
             </div>
+          </div>
         </div>
-    </div>
-</div>
 
-<!-- CHATBOT TOGGLE BUTTON -->
-<div id="chatbotToggle" class="chat-toggle-btn">💬 Chatbot</div>
+        <div class="lg:col-span-7">
+          <div
+            class="bg-white rounded-2xl shadow-xl border border-gray-100 h-full min-h-[400px] flex flex-col relative overflow-hidden"
+          >
+            <div
+              class="bg-gray-50 border-b border-gray-100 p-4 font-semibold text-gray-700 flex justify-between items-center"
+            >
+              <span>2. Kết quả phân tích</span>
+              <span
+                class="text-xs font-mono text-gray-400 bg-white border px-2 py-1 rounded"
+                >AI-MODEL-V2</span
+              >
+            </div>
 
-<!-- CHATBOT PANEL -->
-<div id="chatbotPanel">
-    <div id="chatbotHeader">
-        AI4Life Assistant
-        <span id="chatbotClose">✖</span>
-    </div>
+            <div
+              id="resultEmpty"
+              class="flex-grow flex flex-col items-center justify-center p-10 text-center"
+            >
+              <div
+                class="w-32 h-32 bg-teal-50 rounded-full flex items-center justify-center mb-4 animate-pulse"
+              >
+                <svg
+                  class="w-16 h-16 text-medical-btn"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800">Chưa có dữ liệu</h3>
+              <p class="text-gray-500 text-sm mt-2">
+                Vui lòng tải ảnh lên ở cột bên trái.
+              </p>
+            </div>
 
-    <div id="chatbotBody"></div>
+            <div
+              id="resultContent"
+              class="hidden flex-col h-full w-full p-6 space-y-6"
+            >
+              <div
+                class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center"
+              >
+                <div class="flex-1">
+                  <p class="text-xs text-gray-400 uppercase font-bold mb-1">
+                    Kết luận của AI
+                  </p>
+                  <h3
+                    id="resSummary"
+                    class="text-2xl font-bold text-gray-800 mb-2"
+                  >
+                    --
+                  </h3>
+                  <div id="resRisk" class="text-base">--</div>
+                </div>
+                <div
+                  class="text-center bg-gray-50 p-4 rounded-lg border border-gray-100"
+                >
+                  <p
+                    class="text-3xl font-bold text-teal-600"
+                    id="resConfidence"
+                  >
+                    0%
+                  </p>
+                  <p class="text-xs text-gray-500 mt-1">Độ tin cậy</p>
+                </div>
+              </div>
 
-    <div id="chatbotInputContainer">
-        <input type="text" id="chatbotInput" placeholder="Nhập câu hỏi...">
-        <button id="chatbotSend">Gửi</button>
-    </div>
-</div>
-</div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                  >Ghi chú lâm sàng:</label
+                >
+                <textarea
+                  id="clinicianNotes"
+                  class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-medical-btn focus:outline-none text-sm bg-gray-50"
+                  rows="3"
+                  placeholder="Nhập ghi chú bác sĩ..."
+                ></textarea>
+              </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+              <div class="grid grid-cols-2 gap-4 mt-auto">
+                <button
+                  id="btnCompare"
+                  class="bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200 font-semibold py-3 rounded-lg transition-colors flex justify-center items-center gap-2"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    ></path>
+                  </svg>
+                  So sánh (Heatmap)
+                </button>
+                <button
+                  id="btnShare"
+                  class="bg-gray-800 text-white hover:bg-gray-700 border border-gray-700 font-semibold py-3 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-md"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                  Xuất báo cáo PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<!-- App Logic -->
-<script src="../static/js/app.js"></script>
-<script src="../static/js/chatbot.js"></script>
+      <div class="space-y-8">
+        <div id="compareArea" class="w-full"></div>
 
-</body>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div
+            class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2"
+          >
+            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              Lịch sử khám bệnh
+            </h3>
+            <button
+              id="btnLoadVisits"
+              class="text-sm text-medical-dark hover:underline font-medium"
+            >
+              Làm mới
+            </button>
+          </div>
+          <div
+            id="visitsList"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto custom-scrollbar"
+          >
+            <div class="text-gray-400 text-sm col-span-full text-center py-4">
+              Đang tải dữ liệu...
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      class="bg-gray-900 text-white py-6 mt-12 text-center text-xs text-gray-500"
+    >
+      © 2025 AI4Life Project. All rights reserved.
+    </footer>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const imgPreview = document.getElementById("imagePreview");
+      const uploadPlaceholder = document.getElementById("uploadPlaceholder");
+      const dropArea = document.getElementById("dropArea");
+
+      function showPreview(file) {
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            imgPreview.src = e.target.result;
+            imgPreview.classList.remove("hidden");
+            uploadPlaceholder.classList.add("hidden");
+            // Viền xanh khi có ảnh
+            dropArea.classList.add("border-medical-btn", "bg-white");
+            dropArea.classList.remove("border-dashed");
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      if (fileInput) {
+        fileInput.addEventListener("change", function () {
+          if (this.files && this.files[0]) showPreview(this.files[0]);
+        });
+      }
+
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(
+          eventName,
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          },
+          false
+        );
+      });
+
+      dropArea.addEventListener("dragover", () =>
+        dropArea.classList.add("drag-active")
+      );
+      dropArea.addEventListener("dragleave", () =>
+        dropArea.classList.remove("drag-active")
+      );
+
+      dropArea.addEventListener("drop", (e) => {
+        dropArea.classList.remove("drag-active");
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        if (files.length > 0) showPreview(files[0]);
+      });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/detect.js') }}"></script>
+  </body>
 </html>
