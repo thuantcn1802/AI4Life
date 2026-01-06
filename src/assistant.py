@@ -45,7 +45,7 @@ def generate_reply(text):
 
     # Nếu user chào hỏi
     if "chào" in text or "hello" in text:
-        return "Xin chào! Tôi là AI4Life. Bạn muốn hỏi về loại bệnh da nào?"
+        return "Xin chào! Tôi là AI cancer detection. Bạn muốn hỏi về loại bệnh da nào?"
 
     # Nếu hỏi triệu chứng nhưng không nói tên bệnh
     if "triệu chứng" in text:

@@ -390,20 +390,30 @@ def detect_visits():
 def detect_compare():
     pid = request.args.get("patient_id","").strip() or session.get("uid")
     if not pid: return jsonify({"error":"patient_id required"}), 400
+    
     try:
         visits = get_visits_firestore(pid)
     except Exception as e:
-        import traceback; traceback.print_exc(); return jsonify({"error":"Failed to fetch visits","detail":str(e)}), 500
-    if len(visits)<2: return jsonify({"error":"Need at least 2 visits"}), 400
-    baseline=visits[0]; followup=visits[-1]
-    tmp_a = None; tmp_b = None
+        import traceback; traceback.print_exc()
+        return jsonify({"error":"Failed to fetch visits","detail":str(e)}), 500
+        
+    if len(visits) < 2: 
+        return jsonify({"error":"Need at least 2 visits"}), 400
+        
+    baseline = visits[0]
+    followup = visits[-1]
+    tmp_a = None
+    tmp_b = None
+    
     try:
+        # 1. Download ảnh Baseline
         r = requests.get(baseline["image_url"], timeout=10)
         if r.status_code != 200: return jsonify({"error":"Cannot download baseline image"}), 400
         tmp_a = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
         tmp_a.write(r.content); tmp_a.flush(); tmp_a.close()
         a_path = tmp_a.name
 
+        # 2. Download ảnh Followup
         r2 = requests.get(followup["image_url"], timeout=10)
         if r2.status_code != 200:
             try: os.remove(a_path)
@@ -413,13 +423,29 @@ def detect_compare():
         tmp_b.write(r2.content); tmp_b.flush(); tmp_b.close()
         b_path = tmp_b.name
 
+        # 3. Chạy so sánh
         baseline_local = {"image_path": a_path, **baseline}
         followup_local = {"image_path": b_path, **followup}
-
         progress = system.compare_visits_enhanced(baseline_local, followup_local)
 
+        # --- ĐÂY LÀ HÀM ĐÃ SỬA LỖI ---
         def arr_to_b64(arr):
-            buf = io.BytesIO(); plt.imsave(buf, arr, format='png'); buf.seek(0); return base64.b64encode(buf.read()).decode('ascii')
+            # arr có thể là float (0-1) hoặc uint8 (0-255)
+            # Nếu là float (như heatmap), cần nhân 255 và chuyển sang uint8
+            if arr.dtype != np.uint8:
+                # Kiểm tra xem có phải ảnh float 0-1 không
+                if arr.max() <= 1.0:
+                    arr = (arr * 255).astype(np.uint8)
+                else:
+                    arr = arr.astype(np.uint8)
+            
+            # Dùng PIL để save vào buffer thay vì plt.imsave
+            img = Image.fromarray(arr)
+            buf = io.BytesIO()
+            img.save(buf, format="PNG") # PIL hỗ trợ BytesIO hoàn hảo
+            buf.seek(0)
+            return base64.b64encode(buf.read()).decode('ascii')
+        # -----------------------------
 
         out = {
             "before_after": arr_to_b64(progress["comparison_image"]),
@@ -432,20 +458,17 @@ def detect_compare():
         return jsonify(out)
 
     except Exception as e:
-        import traceback; traceback.print_exc(); return jsonify({"error":"Comparison failed","detail":str(e)}), 500
+        import traceback; traceback.print_exc()
+        return jsonify({"error":"Comparison failed","detail":str(e)}), 500
 
     finally:
-        # cleanup temp files immediately
+        # Cleanup file tạm
         try:
-            if tmp_a:
-                os.remove(tmp_a.name)
-        except Exception:
-            pass
+            if tmp_a: os.remove(tmp_a.name)
+        except Exception: pass
         try:
-            if tmp_b:
-                os.remove(tmp_b.name)
-        except Exception:
-            pass
+            if tmp_b: os.remove(tmp_b.name)
+        except Exception: pass
 
 @detect_bp.route("/detect/share", methods=["POST"])
 @login_required

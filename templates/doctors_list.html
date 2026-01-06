@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh sách Bác sĩ - SkinCare</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "medical-teal": "#8CDAD4",
+              "medical-dark": "#2D8B84",
+              "medical-btn": "#5BBFB2",
+              "medical-btn-hover": "#4DA398",
+              "chat-bg": "#F0F9F8",
+            },
+            fontFamily: {
+              sans: ['"Be Vietnam Pro"', "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      * {
+        font-family: "Be Vietnam Pro", sans-serif !important;
+      }
+      /* Hiệu ứng kính mờ nhẹ cho card */
+      .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans antialiased relative flex flex-col min-h-screen">
+    
+    <nav class="bg-white shadow-sm w-full z-40 fixed top-0 left-0 h-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+            <div class="flex justify-between items-center h-full">
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="/" class="flex items-center gap-2 text-2xl font-bold text-teal-600 tracking-wide">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        SkinCare
+                    </a>
+                </div>
+
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="/detect" class="text-gray-600 hover:text-medical-btn font-medium transition-colors duration-300">Chẩn đoán ảnh</a>
+                    <a href="/chatbox" class="text-gray-600 hover:text-medical-btn font-medium transition-colors duration-300">Chatbox tư vấn</a>
+                    <a href="/user/doctors" class="text-medical-dark font-bold bg-chat-bg px-3 py-1 rounded-full transition-colors duration-300">Chat với bác sĩ</a>
+                    
+                    <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                    
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-gray-600">Xin chào, <span class="font-semibold text-gray-800">{{ session.get('email') }}</span></span>
+                        <a href="/logout" class="text-sm border border-medical-btn text-medical-btn hover:bg-medical-btn hover:text-white px-4 py-2 rounded-full transition-all">
+                            Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-28 pb-20 flex-grow">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-100 text-medical-dark text-sm font-medium mb-4">
+                    <span class="flex h-2 w-2 rounded-full bg-medical-btn"></span>
+                    Kết nối chuyên gia
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Đội ngũ Bác sĩ <span class="text-transparent bg-clip-text bg-gradient-to-r from-medical-btn to-medical-dark">Chuyên khoa</span>
+                </h1>
+                <p class="text-gray-600 leading-relaxed">
+                    Chọn bác sĩ phù hợp và bắt đầu tư vấn trực tuyến. Chúng tôi cam kết bảo mật thông tin và mang lại lời khuyên y tế chính xác nhất.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {% for doc in doctors %}
+                <div class="doctor-card bg-white rounded-2xl border border-gray-100 p-6 flex flex-col items-center text-center transition-all duration-300 relative group overflow-hidden">
+                    
+                    <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-chat-bg to-white z-0"></div>
+
+                    <div class="relative z-10 w-24 h-24 rounded-full bg-white p-1 shadow-md mb-4 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full rounded-full bg-teal-50 flex items-center justify-center text-medical-btn text-3xl">
+                            <i class="bi bi-person-fill-add"></i> <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        </div>
+                        <span class="absolute bottom-1 right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></span>
+                    </div>
+
+                    <div class="relative z-10 w-full">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-medical-dark transition-colors">{{ doc.full_name }}</h3>
+                        <p class="text-medical-btn font-medium text-sm mb-3 uppercase tracking-wide">{{ doc.specialty }}</p>
+                        
+                        <div class="flex items-center justify-center gap-2 text-gray-500 text-xs mb-6 bg-gray-50 py-2 rounded-lg mx-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <span class="truncate max-w-[150px]">{{ doc.email }}</span>
+                        </div>
+
+                        <div class="mt-auto">
+                            {% if current_role in ['user', 'admin'] %}
+                                <a href="/chat?doctor_id={{ doc.uid }}" class="flex items-center justify-center gap-2 w-full bg-medical-btn hover:bg-medical-btn-hover text-white font-semibold py-3 px-6 rounded-full shadow-lg shadow-teal-100 transition-all transform active:scale-95">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    Chat ngay
+                                </a>
+                            {% else %}
+                                <button disabled class="flex items-center justify-center gap-2 w-full bg-gray-100 text-gray-400 font-semibold py-3 px-6 rounded-full cursor-not-allowed">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    Đồng nghiệp
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                    <div class="w-20 h-20 bg-chat-bg rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-medical-btn" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">Chưa có bác sĩ trực tuyến</h3>
+                    <p class="text-gray-500 mt-2">Hiện tại danh sách đang trống. Vui lòng quay lại sau.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <footer class="relative bg-gray-900 text-white pt-20 pb-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div>
+                    <a href="#" class="flex items-center gap-2 text-2xl font-bold text-white tracking-wide mb-6">
+                        <svg class="w-8 h-8 text-medical-btn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        SkinCare AI
+                    </a>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        Tiên phong ứng dụng trí tuệ nhân tạo trong chẩn đoán và theo dõi sức khỏe làn da.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-6 border-b border-gray-700 pb-2 inline-block">Liên hệ</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3 text-gray-400">
+                            <span class="text-medical-btn">●</span> contact@ai4life.vn
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-6 border-b border-gray-700 pb-2 inline-block">Liên kết</h3>
+                    <ul class="space-y-3">
+                        <li><a href="/" class="text-gray-400 hover:text-medical-btn transition-colors">Trang chủ</a></li>
+                        <li><a href="/detect" class="text-gray-400 hover:text-medical-btn transition-colors">Chẩn đoán</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                        <p class="text-xs text-gray-400 text-justify">
+                            Các kết quả từ AI chỉ mang tính chất tham khảo. Luôn thăm khám bác sĩ chuyên khoa.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center">
+                <p class="text-gray-500 text-sm">&copy; 2025 AI Detection Project. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

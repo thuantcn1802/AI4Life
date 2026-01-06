@@ -11,6 +11,7 @@ from routes.detect_routes import detect_bp
 from routes.admin_routes import admin_bp
 from routes.user_routes import user_bp
 from routes.doctor_routes import doctor_bp
+from routes.chat_routes import chat_bp
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -31,12 +32,14 @@ app.register_blueprint(detect_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(doctor_bp)
+app.register_blueprint(chat_bp)
 
 UPLOAD_FOLDER = os.path.join(STATIC_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-
+#Debug secret key
+print("DEBUG: SECRET KEY IS:", app.secret_key)
 
 @app.route("/")
 def home():

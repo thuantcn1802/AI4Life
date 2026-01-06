@@ -10,3 +10,4 @@ python-dotenv
 scikit-image
 reportlab
 supabase
+pip-system-certs

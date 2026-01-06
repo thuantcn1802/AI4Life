@@ -15,14 +15,31 @@ auth_bp = Blueprint("auth", __name__)
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        print("--- DEBUG: Middleware Start ---") # Log 1
         id_token = session.get("idToken")
+        
         if not id_token:
+            print("--- DEBUG: No idToken in session ---") # Log 2
             return redirect(url_for("auth.login"))
-        user = verify_id_token(id_token)
-        if not user:
+            
+        print(f"--- DEBUG: Found Token: {id_token[:10]}... ---") # Log 3
+        
+        try:
+            # Thêm try/except để bắt lỗi từ Firebase verify
+            user = verify_id_token(id_token)
+            if not user:
+                print("--- DEBUG: verify_id_token returned None/False ---") # Log 4
+                session.clear()
+                return redirect(url_for("auth.login"))
+            
+            print("--- DEBUG: User verified OK ---") # Log 5
+            return f(*args, **kwargs)
+            
+        except Exception as e:
+            print(f"--- DEBUG: verify_id_token CRASHED: {e} ---") # Log 6
             session.clear()
             return redirect(url_for("auth.login"))
-        return f(*args, **kwargs)
+            
     return decorated
 
 # ----- Login -----
@@ -59,13 +76,16 @@ def login():
         profile = user_doc.to_dict()
         role = profile.get("role","user")
 
+        # Lưu role vào session
+        session["role"] = role
+
         # redirect theo role
         if role == "admin":
             return redirect("/admin")
         elif role == "doctor":
-            return redirect("/doctor/dashboard")
+            return redirect("/")
         else:
-            return redirect("/detect") # Hoặc trang dashboard của user
+            return redirect("/") 
 
     return render_template("login.html")
 

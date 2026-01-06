@@ -325,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             * Lưu ý: Kết quả này được tạo bởi AI và chỉ mang tính chất tham khảo sàng lọc. 
                             Vui lòng tham vấn bác sĩ chuyên khoa để có chẩn đoán chính xác nhất.
                         </p>
-                        <p class="text-xs text-gray-300 font-semibold">Powered by AI4Life Project © 2025</p>
+                        <p class="text-xs text-gray-300 font-semibold">Powered by AI Detection Project © 2025</p>
                     </div>
 
                     <script>
